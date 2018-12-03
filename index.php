@@ -37,13 +37,11 @@ function getCSVfilelist($dir){
 }
 
 
-function CSVtoDB($dir, $csv){
+function CSVtoDB($dir, $csv, $model){
 	$filePath = $dir . "/" . $csv;
 	$isHeader = true;
 
 	$name = explode(".", $csv)[0];
-	// create Model with file name
-	$model = new Model($name);
 
 	// read csv file line by line
 	$isHeader = true;
@@ -52,11 +50,10 @@ function CSVtoDB($dir, $csv){
 	    	$line = join(",", $data);
 
 	    	// create new table using header of csv(first row)
-	    	if ($isHeader){
-	    		$model->set($line);
+	    	if ($isHeader){	    		
 	    		$model->creatTable();
 	    		$isHeader = false;
-	    	}else{
+	    	}else{	    		
 	    		$model->set($line);
 	    		$model->save();
 	    	}	    	
@@ -67,44 +64,60 @@ function CSVtoDB($dir, $csv){
 
 function main(){
 	// pull zip file from server
-	$zipfile = PullZip(ZIP_URL);
+	// $zipfile = PullZip(ZIP_URL);
 	// extract zip file 
-	Unzip($zipfile,'./');
+	// Unzip($zipfile,'./');
 	// get all csv file names 
 	$filelist = getCSVfilelist('./ipgold-offline');
 
 	// import csv data to db
 	for ($i = 2; $i < count($filelist); $i++){
-		CSVtoDB('./ipgold-offline', $filelist[$i]);
-		echo $filelist[$i]. " Done!<br>";		
+		$modelName = str_replace("IPGOLD", '', explode(".",$filelist[$i])[0]);
+		$model = null;
+		// echo $modelName;exit();
+		switch ($modelName) {
+			case '201':
+				$model = new IPGOLD201();
+				break;
+			case '202':
+				$model = new IPGOLD202();
+				break;
+			case '203':
+				$model = new IPGOLD203();
+				break;
+			case '204':
+				$model = new IPGOLD204();
+				break;			
+			case '206':
+				$model = new IPGOLD206();
+				break;
+			case '207':
+				$model = new IPGOLD207();
+				break;
+			case '208':
+				$model = new IPGOLD208();
+				break;
+			case '220':
+				$model = new IPGOLD220();
+				break;
+			case '221':
+				$model = new IPGOLD221();
+				break;
+			case '222':
+				$model = new IPGOLD222();
+				break;
+
+			default:
+				break;
+		}
+		if (isset($model)){
+			CSVtoDB('./ipgold-offline', $filelist[$i], $model);
+			echo $filelist[$i]. " Done!<br>";
+		}
 	}
 }
 
 
-/*
-function dump(){	
-	$dumpfname = DB_NAME .".sql";
-	$query = "SHOW CREATE database `".DB_NAME."`";
-	$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-	$res = $db->query($query);
-	$file = fopen($dumpfname, "w") or die('Unable to write');
-	while($r=$res->fetch_assoc()) {
-    	fwrite($file, $r['Create Database']);
-	}
-	fclose($file);
-
-	if(file_exists($dumpfname)){
-		header('Content-Description: File Transfer');
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename='.basename($dumpfname));;
-		flush();
-		// readfile($dumpfname);
-		// exit;
-	}
-}*/
-
-
-
-
-
+// echo floatval('');
+// exit;
 main();
