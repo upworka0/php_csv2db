@@ -46,15 +46,13 @@ function CSVtoDB($dir, $csv, $model){
 	// read csv file line by line
 	$isHeader = true;
 	if (($handle = fopen($filePath, "r")) !== FALSE) {
-	    while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
-	    	$line = join(",", $data);
-
+	    while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {	    	
 	    	// create new table using header of csv(first row)
 	    	if ($isHeader){	    		
 	    		$model->creatTable();
 	    		$isHeader = false;
 	    	}else{	    		
-	    		$model->set($line);
+	    		$model->set($data);
 	    		$model->save();
 	    	}	    	
 	    }
@@ -64,9 +62,9 @@ function CSVtoDB($dir, $csv, $model){
 
 function main(){
 	// pull zip file from server
-	// $zipfile = PullZip(ZIP_URL);
+	$zipfile = PullZip(ZIP_URL);
 	// extract zip file 
-	// Unzip($zipfile,'./');
+	Unzip($zipfile,'./');
 	// get all csv file names 
 	$filelist = getCSVfilelist('./ipgold-offline');
 
@@ -117,7 +115,4 @@ function main(){
 	}
 }
 
-
-// echo floatval('');
-// exit;
 main();

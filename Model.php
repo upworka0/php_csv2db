@@ -14,8 +14,7 @@ class Model
 	 */
 	public function __construct($name)
 	{
-		$this->Name = $name;  // table name
-		$this->Text = "";     // line of csv
+		$this->Name = $name;  // table name		
 		$this->Dbcon = new mysqli(DB_HOST, DB_USER,DB_PASS,DB_NAME); // db instance
 		if(mysqli_connect_error()) {
 			echo "My sql connection Error!";
@@ -32,8 +31,10 @@ class Model
 	 * @param 	: text(string)
 	 * @return 	: string
 	 */
-	function format($text){
-		return $this->Dbcon->real_escape_string(str_replace("'", "''", str_replace('\n', '', str_replace('"', '', $text))));
+	function format(){
+		for ($i = 0 ;  $i < count($this->values); $i++){
+			$this->values[$i] = $this->Dbcon->real_escape_string(str_replace("'", "''", str_replace('\n', '', str_replace('"', '', $this->values[$i]))));
+		}		
 	}
 
 	/**
@@ -66,16 +67,12 @@ class Model
 	 * @param: none
 	 * @return : none
 	 */	
-	function getValues(){
-		$this->values = array();
-		$vals = explode(",", $this->format($this->Text));
+	function getValues(){			
 		for ($i = 0 ; $i < count($this->types); $i++){
 			if (strpos($this->types[$i], 'INT')!== false || strpos($this->types[$i], 'DOUBLE') !== false)
-				array_push($this->values, floatval($vals[$i]));
+				$this->values[$i] = floatval($this->values[$i]);				
 			else if(strpos($this->types[$i], 'DATE')!==false)
-				array_push($this->values, $this->getDate($vals[$i]));
-			else
-				array_push($this->values, $vals[$i]);
+				$this->values[$i] = $this->getDate($this->values[$i]);				
 		}
 	}
 	/**
@@ -164,8 +161,9 @@ class Model
 	 * @param : text(string)
 	 * @return : none
 	 */
-	public function set($text){	
-		$this->Text = $text;		
+	public function set($values){
+		$this->values= $values;
+		$this->format();
 		$this->getValues();		
 	}
 }
@@ -189,7 +187,7 @@ class IPGOLD201 extends Model
 			"TEXT",
 			"DATE",
 			"DATE",
-			"DATE",
+			"TEXT",
 			"INT(2) DEFAULT NULL",			
 			"INT(5) DEFAULT NULL",			
 			"INT(10) DEFAULT NULL",
@@ -293,7 +291,7 @@ class IPGOLD203 extends Model
 		$this->types=array(
 			"INT",
 			"INT(10) DEFAULT NULL",
-			"INT(10) DEFAULT NULL",
+			"TEXT",
 			"TEXT",			
 			"TEXT",
 			"TEXT",
@@ -604,7 +602,7 @@ class IPGOLD220 extends Model
 			"INT(10) DEFAULT NULL",
 			"DATE",
 			"TEXT",
-			"INT(10) DEFAULT NULL",
+			"TEXT",
 			"DATE"
 		);
 		$this->fields = array(
